@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load pybo_filter %}
+{% load static %}
+{% block content %}
+<div class="text-center my-5">
+    <h1>주차장 현황</h1>
+</div>
+
+ <div class="d-flex justify-content-center">
+
+
+     <img src="{% static "parking.png" %}" alt="My image"
+          class = "rounded"
+          style="height: 500px"
+     />
+    <img src="{% static "parking2.png" %}" alt="My image"
+         class = "rounded"
+         style="height: 500px"
+    />
+    <img src="{% static "parking2.png" %}" alt="My image"
+         class = "rounded"
+         style="height: 500px"
+    />
+    <img src="{% static "parking2.png" %}" alt="My image"
+         class = "rounded"
+         style="height: 500px"
+    />
+ </div>
+
+
+{% endblock %}
