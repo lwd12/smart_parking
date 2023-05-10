@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load pybo_filter %}
+{% load static %}
+{% block content %}
+        <style>
+      .img {
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .img:hover {
+        opacity: 0.8;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 0.8);
+      }
+
+      .modal-content {
+        margin: auto;
+        display: block;
+        width: 50%;
+        max-width: 1000px;
+        border-radius: 10px;
+        animation-name: zoom;
+        animation-duration: 0.8s;
+      }
+
+      @keyframes zoom {
+        from {
+          transform: scale(0);
+        }
+        to {
+          transform: scale(1);
+        }
+      }
+
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #fff;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    </style>
+<div class="container my-3 ">
+    <div class="row my-3">
+        <h2 class="border-bottom py-2">방문자 등록</h2>
+        <div class="col-6 offset-6">
+            <div class=" input-group">
+                <input type="text" id="search_kw1" class="form-control" value="{{ kw1|default_if_none:'' }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="btn_search1">찾기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <table class="table">
+        <thead>
+        <tr class="text-center table-dark">
+            <th>번호</th>
+            <th>차량번호</th>
+            <th>동/호수</th>
+            <th>등록 시간</th>
+            <th>방문 날짜</th>
+            <th>출/입</th>
+            <th>신청 취소</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if visitor_list %}
+        {% for visitor in visitor_list %}
+        <tr class="text-center">
+            <td>
+                <!-- 번호 = 전체건수 - 시작인덱스 - 현재인덱스 + 1 -->
+                {{ visitor_list.paginator.count|sub:visitor_list.start_index|sub:forloop.counter0|add:1 }}
+            </td>
+            <td class="text-start">
+                {{ visitor.visitor_information_carnumber }}
+            </td>
+            <td>{{ visitor.resident_dong }}동 {{ visitor.resident_ho }}호</td>
+            <td>{{ visitor.visitor_information_datetime }}</td><!-- 글쓴이 추가 -->
+            <td>{{ visitor.visitor_information_date }}</td>
+            {% if visitor.car_out %}
+                <td>출</td>
+            {% else %}
+                <td>입</td>
+            {% endif %}
+              <td>
+        <a href="#" data-uri="{% url 'visitor:visitor_delete' visitor.visitor_information_number %}"
+                class="delete btn btn-danger pull-right" style="vertical-align: middle;">삭제</a>
+      </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr class = "text-center">
+            <td colspan="7" >기록이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+<!-- 페이징처리 시작 -->
+    <ul class="pagination justify-content-center" id="pagination1">
+        <!-- 이전페이지 -->
+        {% if visitor_list.has_previous %}
+        <li class="page-item">
+            <a class="page-link"  data-page="{{ visitor_list.previous_page_number }}"
+            href="javascript:void(0)">이전</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link"  tabindex="-1" aria-disabled="true" href="#">이전</a>
+        </li>
+        {% endif %}
+        <!-- 페이지리스트 -->
+        {% for page_number in visitor_list.paginator.page_range %}
+        {% if page_number >= visitor_list.number|add:-5 and page_number <= visitor_list.number|add:5 %}
+        {% if page_number == visitor_list.number %}
+        <li class="page-item active" aria-current="page">
+            <a class="page-link" data-page="{{ page_number }}"
+           href="javascript:void(0)">{{ page_number }}</a>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link"  data-page="{{ page_number }}"
+           href="javascript:void(0)">{{ page_number }}</a>
+        </li>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+
+        <!-- 다음페이지 -->
+        {% if visitor_list.has_next %}
+        <li class="page-item">
+            <a class="page-link"  data-page="{{ visitor_list.next_page_number }}"
+           href="javascript:void(0)">다음</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link"  tabindex="-1" aria-disabled="true" href="#">다음</a>
+        </li>
+        {% endif %}
+    </ul>
+    <!-- 페이징처리 끝 -->
+</div>
+<form id="searchForm1" method="get" action="{% url 'visitor:visitor' %}">
+    <input type="hidden" id="kw1" name="kw1" value="{{ kw1|default_if_none:'' }}">
+    <input type="hidden" id="page1" name="page1" value="{{ page1 }}">
+</form>
+<div class="container my-3 ">
+    <div class="row my-3">
+        <h2 class="border-bottom py-2">비인가 출입 기록</h2>
+        <div class="col-6 offset-6">
+            <div class=" input-group">
+                <input type="text" id="search_kw2" class="form-control" value="{{ kw2|default_if_none:'' }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="btn_search2">찾기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr class="text-center table-dark">
+            <th>번호</th>
+            <th>차량번호</th>
+            <th>동/호수</th>
+            <th>입차 시간</th>
+            <th>출차 시간</th>
+            <th>출/입</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if unauthorized_list %}
+        {% for unauthorized in unauthorized_list %}
+        <tr class="text-center">
+            <td>
+                <!-- 번호 = 전체건수 - 시작인덱스 - 현재인덱스 + 1 -->
+                {{ unauthorized_list.paginator.count|sub:unauthorized_list.start_index|sub:forloop.counter0|add:1 }}
+            </td>
+            <td><span class="images-links" data-image="{{ unauthorized.unauthorized_carnumbers }}">{{ unauthorized.unauthorized_carnumbers }}</span></td>
+            <td>{{ unauthorized.resident_dong }}동 {{ unauthorized.resident_ho }}호</td>  <!-- 글쓴이 추가 -->
+            <td>{{ unauthorized.entrydatetime }}</td>
+            <td>{{ unauthorized.exitdatetime }}</td>
+            {% if unauthorized.exitdatetime %}
+                <td>출</td>
+            {% else %}
+                <td>입</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr class = "text-center">
+            <td colspan="6" >기록이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    <div class="modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <span class="close">&times;</span>
+             <div class="modal-content">
+                  <img class="modal-img" id="img01" alt="이미지가 없습니다.">
+             </div>>
+        </div>>
+    </div>
+
+ <!-- 페이징처리 시작 -->
+    <ul class="pagination justify-content-center" id="pagination2">
+        <!-- 이전페이지 -->
+        {% if unauthorized_list.has_previous %}
+        <li class="page-item">
+            <a class="page-link" data-page="{{ unauthorized_list.previous_page_number }}"
+            href="javascript:void(0)">이전</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true" href="#">이전</a>
+        </li>
+        {% endif %}
+        <!-- 페이지리스트 -->
+        {% for page_number in unauthorized_list.paginator.page_range %}
+        {% if page_number >= unauthorized_list.number|add:-5 and page_number <= unauthorized_list.number|add:5 %}
+        {% if page_number == unauthorized_list.number %}
+        <li class="page-item active" aria-current="page">
+            <a class="page-link" data-page="{{ page_number }}"
+           href="javascript:void(0)">{{ page_number }}</a>
+        </li>
+        {% else %}
+        <li class="page-item">
+            <a class="page-link" data-page="{{ page_number }}"
+           href="javascript:void(0)">{{ page_number }}</a>
+        </li>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+
+        <!-- 다음페이지 -->
+        {% if unauthorized_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" data-page="{{ unauthorized_list.next_page_number }}"
+           href="javascript:void(0)">다음</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true" href="#">다음</a>
+        </li>
+        {% endif %}
+    </ul>
+    <!-- 페이징처리 끝 -->
+</div>
+<form id="searchForm2" method="get" action="{% url 'visitor:visitor' %}">
+    <input type="hidden" id="kw2" name="kw2" value="{{ kw2|default_if_none:'' }}">
+    <input type="hidden" id="page2" name="page2" value="{{ page2 }}">
+</form>
+{% endblock %}
+{% block script %}
+<script type='text/javascript'>
+
+const modal = document.querySelector(".modal");
+const modalImg = document.querySelector(".modal-img");
+const span = document.querySelector(".close");
+const imageLinks = document.querySelectorAll(".images-links");
+const page_element1 = document.querySelectorAll("#pagination1 .page-link");
+const page_element2 = document.querySelectorAll("#pagination2 .page-link");
+const pagination1 = document.getElementById("pagination1");
+const pagination2 = document.getElementById("pagination2");
+
+Array.from(page_element1).forEach(function(element) {
+  element.addEventListener('click', function(event) {
+    if (modal.style.display === "block") {
+      event.preventDefault();
+      return false;
+    }
+    document.getElementById('page1').value = this.dataset.page;
+    document.getElementById('searchForm1').submit();
+  });
+});
+Array.from(page_element2).forEach(function(element) {
+  element.addEventListener('click', function(event) {
+    if (modal.style.display === "block") {
+      event.preventDefault();
+      return false;
+    }
+    document.getElementById('page2').value = this.dataset.page;
+    document.getElementById('searchForm2').submit();
+  });
+});
+document.getElementById("search_kw1").addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("btn_search1").click();
+        }
+});
+
+const btn_search1 = document.getElementById("btn_search1");
+btn_search1.addEventListener('click', function() {
+    document.getElementById('kw1').value = document.getElementById('search_kw1').value;
+    document.getElementById('page1').value = 1;  // 검색버튼을 클릭할 경우 1페이지부터 조회한다.
+    document.getElementById('searchForm1').submit();
+});
+document.getElementById("search_kw2").addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("btn_search2").click();
+        }
+});
+
+const btn_search2 = document.getElementById("btn_search2");
+btn_search2.addEventListener('click', function() {
+    document.getElementById('kw2').value = document.getElementById('search_kw2').value;
+    document.getElementById('page2').value = 1;  // 검색버튼을 클릭할 경우 1페이지부터 조회한다.
+    document.getElementById('searchForm2').submit();
+});
+
+imageLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    const imageName = link.dataset.image;
+    const imagePath = "{% static 'images/' %}" + imageName + ".png";
+    modalDisplay("block");
+    modalImg.src = imagePath;
+    togglePaginationActive(pagination1, false);
+    togglePaginationActive(pagination2, false);
+  });
+});
+
+modal.addEventListener("click", () => {
+  modalDisplay("none");
+  const paginationElements = pagination2.getElementsByClassName("page-link");
+  Array.from(paginationElements).forEach((element) => {
+    element.classList.remove("active");
+  });
+});
+
+function modalDisplay(displayValue) {
+  modal.style.display = displayValue;
+}
+
+function togglePaginationActive(pagination, enable) {
+  const pageItems = pagination.querySelectorAll(".page-item");
+  pageItems.forEach(function(item) {
+    if (enable) {
+      item.classList.add("active");
+    } else {
+      item.classList.remove("active");
+    }
+  });
+}
+const delete_elements = document.getElementsByClassName("delete");
+Array.from(delete_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("정말로 삭제하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+</script>
+{% endblock %}

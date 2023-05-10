@@ -2,30 +2,48 @@
 {% load pybo_filter %}
 {% load static %}
 {% block content %}
-<div class="text-center my-5">
-    <h1>주차장 현황</h1>
+<div class="container my-3">
+    <div class="row my-4">
+            <h2 class="border-bottom py-2">주차장 현황</h2>
+        </div>
+
+     <div class="d-flex justify-content-center">
+         {% if Parking_lot %}
+                {% for name in Parking_lot %}
+                  <div class="image-container">
+                        {% if name.parking_seatstate == True %}
+                            <img src="{% static 'park_car.png' %}" alt="parking" class="rounded" style="height: 500px">
+                        {% else %}
+                            {% if name.parking_evchargedseattstate == True %}
+                                <img src="{% static 'EVcar.png' %}" alt="EV_car" class="rounded" style="height: 500px">
+                            {% else %}
+                              <img src="{% static 'parking2.png' %}" alt="empty" class="rounded" style="height: 500px">
+                            {% endif %}
+                        {% endif %}
+                    <ul class="text-list d-none">
+                      <li>차량위치: {{ name.parking_generalseat }}</li>
+                      <li>전기차:{{ name.parking_evchargedseattstate }} </li>
+                      <li>차량번호: {{ name.parking_seatcarnumber }}</li>
+                    </ul>
+                  </div>
+            {% endfor %}
+         {% else %}
+              <img src="{% static 'parking2.png' %}" alt="empty" class="rounded" style="height: 500px">
+              <img src="{% static 'parking2.png' %}" alt="empty" class="rounded" style="height: 500px">
+              <img src="{% static 'parking2.png' %}" alt="empty" class="rounded" style="height: 500px">
+
+
+     {% endif %}
+     </div>
 </div>
-
- <div class="d-flex justify-content-center">
-
-
-     <img src="{% static "parking.png" %}" alt="My image"
-          class = "rounded"
-          style="height: 500px"
-     />
-    <img src="{% static "parking2.png" %}" alt="My image"
-         class = "rounded"
-         style="height: 500px"
-    />
-    <img src="{% static "parking2.png" %}" alt="My image"
-         class = "rounded"
-         style="height: 500px"
-    />
-    <img src="{% static "parking2.png" %}" alt="My image"
-         class = "rounded"
-         style="height: 500px"
-    />
- </div>
-
-
+{% endblock %}
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('.image-container img').click(function() {
+      $(this).siblings('.text-list').toggleClass('d-none');
+    });
+  });
+</script>
 {% endblock %}

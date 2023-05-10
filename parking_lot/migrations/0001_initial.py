@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='Post',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(blank=True, null=True, upload_to='images/')),
+                ('images', models.ImageField(blank=True, null=True, upload_to='images/')),
             ],
         ),
     ]

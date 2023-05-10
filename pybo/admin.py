@@ -6,5 +6,4 @@ class QuestionAdmin(admin.ModelAdmin):
     search_fields = ['subject']
 
 
-
 admin.site.register(Question, QuestionAdmin)

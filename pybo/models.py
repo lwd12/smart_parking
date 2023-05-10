@@ -8,6 +8,7 @@ class Question(models.Model):
     content = models.TextField()
     create_date = models.DateTimeField()
     modify_date = models.DateTimeField(null=True, blank=True)
+    top_fixed = models.BooleanField(verbose_name='top_fix', default=False)
 
     def __str__(self):
         return self.subject
@@ -19,3 +20,6 @@ class Answer(models.Model):
     content = models.TextField()
     create_date = models.DateTimeField()
     modify_date = models.DateTimeField(null=True, blank=True)
+
+
+

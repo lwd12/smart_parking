@@ -5,5 +5,5 @@ app_name = 'camera'
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path("detectme", views.detectme, name='detectme'),
+    path("detectme/", views.detectme, name='detectme'),
 ]

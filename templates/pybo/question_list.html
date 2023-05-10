@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load pybo_filter %}
 {% block content %}
@@ -35,7 +34,7 @@
             </td>
             <td class="text-start">
                 <a href="{% url 'pybo:detail' question.id %}">{{ question.subject }}</a>
-                {% if question.answer_set.count > 0 %}
+                {% if question.count > 0 %}
                 <span class="text-danger small mx-2">{{ question.answer_set.count }}</span>
                 {% endif %}
             </td>
@@ -44,7 +43,7 @@
         </tr>
         {% endfor %}
         {% else %}
-        <tr>
+        <tr class = "text-center">
             <td colspan="4">질문이 없습니다.</td>
         </tr>
         {% endif %}
@@ -95,7 +94,7 @@
     <!-- 페이징처리 끝 -->
 
 </div>
-<form id="searchForm" method="get" action="{% url 'index' %}">
+<form id="searchForm" method="get" action="{% url 'pybo:index' %}">
     <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
     <input type="hidden" id="page" name="page" value="{{ page }}">
 </form>

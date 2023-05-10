@@ -1,56 +1,90 @@
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect, resolve_url
-from django.utils import timezone
 
-from ..forms import AnswerForm
-from ..models import Question, Answer
+from django.shortcuts import render, redirect, resolve_url
+from datetime import datetime
+from .SendApi import send_api
+import requests
+API_HOST = "http://192.168.0.19:9000"
+API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
+url = 'http://192.168.0.19:9000/answer/'
+headers = {
+    # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
+    "Content-Type": "application/json",
+    "charset": "UTF-8",
+    "Accept": "*/*",
+}
+body = {}
+def answer_create(request, question_number):
+    now = datetime.now()
+    iso_time = now.isoformat()
+    if request.method == 'POST':
+        if 'session' in request.COOKIES:
+            session = {}
+            session['session'] = request.COOKIES['session']
+            responses = requests.post(API_HOST2, data=session)
+            data = responses.json()
+
+            body['content'] = request.POST.get('content')
+            body['create_date'] = iso_time
+            body['creator'] = data['username']
+            body['modify_date'] = None
+            body['question_number'] = question_number
+            send_api(API_HOST, "/answer/", "POST", headers, body)
+            return redirect('pybo:detail', question_number=question_number)
+        else:
+            return redirect('common:login')
 
 
-@login_required(login_url='common:login')
-def answer_create(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
+def answer_modify(request, answer_number):
+
+    now = datetime.now()
+    iso_time = now.isoformat()
+    req = requests.get(url)
+    response = req.json()
+    if request.method == 'GET':
+        if 'session' in request.COOKIES:
+            session = {}
+            session['session'] = request.COOKIES['session']
+            responses = requests.post(API_HOST2, data=session)
+            data = responses.json()
+            for x in range(len(response)):
+                if answer_number == response[x]['answer_number']:
+                    content = response[x]['content']
+                    context = {
+                        'username': data['username'],
+                        'login_status': request.COOKIES.get('login_status'),
+                        'content': content
+                    }
+                    return render(request, 'pybo/answer_form.html', context)
+        else:
+            return redirect('common:login')
     if request.method == "POST":
-        form = AnswerForm(request.POST)
-        if form.is_valid():
-            answer = form.save(commit=False)
-            answer.author = request.user  # author 속성에 로그인 계정 저장
-            answer.create_date = timezone.now()
-            answer.question = question
-            answer.save()
+        if 'session' in request.COOKIES:
+            body['content'] = request.POST.get('content')
+            body['modify_date'] = iso_time
+            send_api(API_HOST, f"/answer/{answer_number}", "PUT", headers, body)
+            question_number = ''
+            for x in range(len(response)):
+                if answer_number == response[x]['answer_number']:
+                    question_number = response[x]['question_number']
             return redirect('{}#answer_{}'.format(
-                resolve_url('pybo:detail', question_id=question.id), answer.id))
+                        resolve_url('pybo:detail', question_number=question_number), answer_number))
+        else:
+            return redirect('common:login')
+
+
+
+
+def answer_delete(request, answer_number):
+    if 'session' in request.COOKIES:
+        req = requests.get(url)
+        response = req.json()
+        for x in range(len(response)):
+            if answer_number == response[x]['answer_number']:
+                question_number = response[x]['question_number']
+                send_api(API_HOST, f"/answer/{answer_number}", "DELETE", headers, body)
+                return redirect('pybo:detail', question_number=question_number)
+
     else:
-        form = AnswerForm()
-    context = {'question': question, 'form': form}
-    return render(request, 'pybo/question_detail.html', context)
+        return redirect('common:login')
 
 
-@login_required(login_url='common:login')
-def answer_modify(request, answer_id):
-    answer = get_object_or_404(Answer, pk=answer_id)
-    if request.user != answer.author:
-        messages.error(request, '수정권한이 없습니다')
-        return redirect('pybo:detail', question_id=answer.question.id)
-    if request.method == "POST":
-        form = AnswerForm(request.POST, instance=answer)
-        if form.is_valid():
-            answer = form.save(commit=False)
-            answer.modify_date = timezone.now()
-            answer.save()
-            return redirect('{}#answer_{}'.format(
-                resolve_url('pybo:detail', question_id=answer.question.id), answer.id))
-    else:
-        form = AnswerForm(instance=answer)
-    context = {'answer': answer, 'form': form}
-    return render(request, 'pybo/answer_form.html', context)
-
-
-@login_required(login_url='common:login')
-def answer_delete(request, answer_id):
-    answer = get_object_or_404(Answer, pk=answer_id)
-    if request.user != answer.author:
-        messages.error(request, '삭제권한이 없습니다')
-    else:
-        answer.delete()
-    return redirect('pybo:detail', question_id=answer.question.id)
