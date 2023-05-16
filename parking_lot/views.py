@@ -1,23 +1,21 @@
 from django.shortcuts import render, redirect
 import requests
 
-url = 'http://192.168.0.19:9000/insidetheparkinglot/'
-API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
+API_HOST = 'http://192.168.0.19:9000'
+PARKING_URL = f'{API_HOST}/insidetheparkinglot/'
+SESSION_URL = f'{API_HOST}/SessionData/'
 
 
 def parking(request):
     if request.method == 'GET':
-        if 'session' in request.COOKIES:
-            session = {}
-            session['session'] = request.COOKIES['session']
-            responses = requests.post(API_HOST2, data=session)
-            data = responses.json()
-            req = requests.get(url)
-            response = req.json()
-            context = {
-                'username': data['username'],
-                'Parking_lot': response,
-            }
-            return render(request, 'parking_lot/parking_lot.html', context)
-        else:
+        session_id = request.COOKIES.get('session')
+        if not session_id:
             return redirect('common:login')
+        session_data = {'session': session_id}
+        response = requests.post(SESSION_URL, data=session_data).json()
+        username = response.get('username')
+
+        parking_data = requests.get(PARKING_URL).json()
+        context = {'username': username, 'Parking_lot': parking_data}
+
+        return render(request, 'parking_lot/parking_lot.html', context)

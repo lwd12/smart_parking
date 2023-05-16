@@ -3,6 +3,7 @@
 {% block content %}
 <div class="container my-3">
     <div class="row my-3">
+        <h2 class="border-bottom py-2">공지사항 & 건의사항</h2>
         <div class="col-6">
             <a href="{% url 'pybo:question_create' %}" class="btn btn-primary">질문 등록하기</a>
         </div>
@@ -27,19 +28,23 @@
         <tbody>
         {% if question_list %}
         {% for question in question_list %}
-        <tr class="text-center">
+        {% if question.etc == '공지' %}
+            <tr class="text-center" bgcolor="#D9E5FF">
+        {% else %}
+            <tr class="text-center">
+        {% endif %}
             <td>
                 <!-- 번호 = 전체건수 - 시작인덱스 - 현재인덱스 + 1 -->
                 {{ question_list.paginator.count|sub:question_list.start_index|sub:forloop.counter0|add:1 }}
             </td>
-            <td class="text-start">
-                <a href="{% url 'pybo:detail' question.id %}">{{ question.subject }}</a>
+            <td class="text-start" style="margin-left: 3%">
+                <a href="{% url 'pybo:detail' question.question_number %}">({{ question.etc }}) {{ question.subject }}</a>
                 {% if question.count > 0 %}
-                <span class="text-danger small mx-2">{{ question.answer_set.count }}</span>
+                <span class="text-danger small mx-2">{{ question.count }}</span>
                 {% endif %}
             </td>
-            <td>{{ question.author.username }}</td>  <!-- 글쓴이 추가 -->
-            <td>{{ question.create_date }}</td>
+            <td>{{ question.creator }}</td>  <!-- 글쓴이 추가 -->
+            <td>{{ question.create_datetime }}</td>
         </tr>
         {% endfor %}
         {% else %}
@@ -50,7 +55,7 @@
         </tbody>
     </table>
  <!-- 페이징처리 시작 -->
-    <ul class="pagination justify-content-center">
+    <ul class="pagination justify-content-center" >
         <!-- 이전페이지 -->
         {% if question_list.has_previous %}
         <li class="page-item">

@@ -10,6 +10,7 @@ urls = 'http://192.168.0.19:9000/answer/'
 
 API_HOST = 'http://192.168.0.19:9000/SessionData/'
 
+
 def qdata(question_number):
     try:
         req = requests.get(url)
@@ -78,13 +79,9 @@ def count(question_id):
     try:
         reqs = requests.get(urls)
         responses = reqs.json()
-        count = 0
-        for x in range(len(responses)):
-            if question_id == responses[x]['question_number']:
-                count += 1
+        return sum(1 for data in responses if data['question_number'] == question_id)
     except ConnectTimeout:
-        count = None
-    return count
+        return None
 
 
 def is_date_format(string):
@@ -95,36 +92,31 @@ def is_date_format(string):
         return False
 
 
+def change_datetime_format(date_string):
+    if date_string:
+        try:
+            date_obj = datetime.fromisoformat(date_string)
+            return date_obj.strftime("%Y년 %m월 %d일 %H시 %M분")
+        except ValueError:
+            pass
+    return date_string
+
+
 def change():
     try:
         req = requests.get(url)
         responses = req.json()
-        QData = responses
         sorted_data = []
-        for x in range(len(QData)):
-            create_date = QData[x]['create_datetime']
-            if create_date:
-                if not is_date_format(create_date):
-                    create_dates = datetime.fromisoformat(create_date)
-                    create_date = create_dates.strftime("%Y년 %m월 %d일 %H시 %M분")
-            QData[x]['create_datetime'] = create_date
-            QData[x]['count'] = count(QData[x]['question_number'])
-            modify_date = QData[x]['modify_datetime']
-            if modify_date:
-                if not is_date_format(modify_date):
-                    modifys_dates = datetime.fromisoformat(modify_date)
-                    modify_date = modifys_dates.strftime("%Y년 %m월 %d일 %H시 %M분")
-            QData[x]['modify_datetime'] = modify_date
-            QData[x]['create_datetime'] = create_date
-            QData[x]['count'] = count(QData[x]['question_number'])
-        if QData:
-            sorted_data = sorted(QData, key=lambda x: x['question_number'], reverse=True)
-            return sorted_data
-        else:
-            return sorted_data
-    except ConnectTimeout:
-        sorted_data = []
+        for data in responses:
+            data['create_datetime'] = change_datetime_format(data['create_datetime'])
+            data['modify_datetime'] = change_datetime_format(data['modify_datetime'])
+            data['count'] = count(data['question_number'])
+            sorted_data.append(data)
+
+        sorted_data = sorted(sorted_data, key=lambda x: x['question_number'], reverse=True)
         return sorted_data
+    except ConnectTimeout:
+        return []
 
 
 def index(request):
@@ -164,7 +156,7 @@ def index(request):
                        'kw': kw,
                        'username': data['username']
                        }
-            return render(request, 'pybo/test.html', context)
+            return render(request, 'pybo/question_list.html', context)
         else:
             return redirect('common:login')
 

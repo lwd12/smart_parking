@@ -16,7 +16,7 @@ urlx = 'http://192.168.0.19:9000/answer/'
 # 호출 예시
 API_HOST = 'http://192.168.0.19:9000/RegistUser/'
 API_HOST2 = 'http://192.168.0.19:9000/loginforAdministrator/'
-pattern = r"^(?=.*[!@#$%^&*(),.?\":{}|<>])(?=.*\d)(?=.*[a-zA-Z]).{8,19}$"
+
 
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
@@ -107,7 +107,7 @@ def login_api(request):
                     'username': login_ID,
                 }
 
-                responses = render(request, 'pybo/test.html', context)
+                responses = render(request, 'pybo/question_list.html', context)
                 responses.set_cookie('session', data['session'])
                 return responses
             else:
@@ -126,56 +126,55 @@ def logout(request):
 
 def signup(request):
     if request.method == 'GET':
-        context = {'error_message': False}
         if 'session' in request.COOKIES:
             context = {
                 'username': request.COOKIES['username'],
                 'login_status': request.COOKIES.get('login_status'),
             }
-            return render(request, 'pybo/test.html', context)
-        else:
-            return render(request, 'common/signup.html', context)
+            return render(request, 'pybo/question_list.html', context)
+
+        context = {'error_message': False}
+        return render(request, 'common/signup.html', context)
 
     if request.method == "POST":
-
         login_ID = request.POST.get('username')
+        login_PassWd = request.POST.get('password')
+        email = request.POST.get('email')
+
         if not 8 <= len(login_ID) < 15:
             context = {'error_message': '아이디의 길이가 맞지 않습니다.'}
             return render(request, 'common/signup.html', context)
 
-        login_PassWd = request.POST.get('password')
-
+        pattern = r"^(?=.*[!@#$%^&*(),.?\":{}|<>])(?=.*\d)(?=.*[a-zA-Z]).{8,19}$"
         if not re.match(pattern, login_PassWd):
             context = {'error_message': '비밀번호 형식이 맞지 않습니다.'}
             return render(request, 'common/signup.html', context)
 
-        hashed = hashlib.sha256()
-        hashed.update(login_PassWd.encode('utf-8'))
-        email = request.POST.get('email')
-        body['login_ID'] = login_ID
-        body['login_PassWd'] = hashed.hexdigest()
-        body['email'] = email
-        responses = requests.post(API_HOST, data=body)
-        data = responses.json()
+        hashed_password = hashlib.sha256(login_PassWd.encode('utf-8')).hexdigest()
 
-        if data['error']:
+        body = {'login_ID': login_ID, 'login_PassWd': hashed_password, 'email': email}
+        response = requests.post(API_HOST, data=body)
+        data = response.json()
+
+        if data.get('error'):
             context = {'error_message': data['error']}
             return render(request, 'common/signup.html', context)
-        else:
-            page = request.GET.get('page', '1')  # 페이지
-            kw = request.GET.get('kw', '')  # 검색어
-            respon = change()
-            paginator = Paginator(respon, 10)
-            page_obj = paginator.get_page(page)
-            context = {
-                'question_list': page_obj,
-                'page': page,
-                'kw': kw,
-                'username': login_ID,
-            }
-            response = render(request, 'pybo/test.html', context)
-            response.set_cookie('session', data['session'])
-            return response
+
+        page = request.GET.get('page', '1')  # 페이지
+        kw = request.GET.get('kw', '')  # 검색어
+        response_data = change()
+        paginator = Paginator(response_data, 10)
+        page_obj = paginator.get_page(page)
+        context = {
+            'question_list': page_obj,
+            'page': page,
+            'kw': kw,
+            'username': login_ID,
+        }
+
+        response = render(request, 'pybo/question_list.html', context)
+        response.set_cookie('session', data['session'])
+        return response
 
 
 def page_not_found(request, exception):

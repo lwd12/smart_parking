@@ -74,8 +74,8 @@ def question_modify(request, question_number):
             body['subject'] = request.POST.get('subject')
             body['content'] = request.POST.get('content')
             body['modify_datetime'] = iso_time
+            print(body)
             send_api(API_HOST, f"/question/{question_number}", "PUT", headers, body)
-
             return redirect('/pybo/{}/#question_{}'.format(question_number, question_number))
         else:
             return redirect('common:login')

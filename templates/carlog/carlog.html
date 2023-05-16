@@ -39,20 +39,28 @@
         {% elif carlog.carnumber %}
             <td>{{ carlog.carnumber }}</td>
         {% endif %}
-            <td>{{ carlog.resident_dong }}동 {{ carlog.resident_ho }}호</td>  <!-- 글쓴이 추가 -->
-            <td>{{ carlog.entrydatetime }}</td>
-            <td>{{ carlog.exitdatetime }}</td>
+            <td>{{ carlog.resident_dong }}동 {{ carlog.resident_ho }}호</td>
+            {% if carlog.entrydatetime == None %}
+                <td></td>
+            {% else %}
+                <td>{{ carlog.entrydatetime }}</td>
+            {% endif %}
+            {% if carlog.exitdatetime == None %}
+                <td></td>
+            {% else %}
+                <td>{{ carlog.exitdatetime }}</td>
+            {% endif %}
         {% if carlog.exitdatetime %}
             <td>출</td>
         {% else %}
             <td>입</td>
         {% endif %}
         {% if carlog.unauthorized_carnumbers %}
-            <td>비인가차량</td>
-        {% elif carlog.visitor_information_number %}
-            <td>방문자</td>
-        {% elif carlog.residest_number %}
-            <td>입주자</td>
+            <td>비인가 차량</td>
+        {% elif carlog.person_check %}
+            <td>{{ carlog.person_check }} 차량</td>
+        {% else %}
+            <td>입주자 차량</td>
         {% endif %}
         </tr>
         {% endfor %}
