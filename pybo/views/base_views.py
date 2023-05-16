@@ -11,7 +11,7 @@ urls = 'http://192.168.0.19:9000/answer/'
 API_HOST = 'http://192.168.0.19:9000/SessionData/'
 
 
-def qdata(question_number):
+def qdata(question_number):  # 질문 정보 불러오고 처리하기
     try:
         req = requests.get(url)
         response = req.json()
@@ -39,10 +39,10 @@ def qdata(question_number):
         create_date = None
         creator = None
         modify_date = None
-        return id, subject, content, create_date, creator, modify_date
+        return id, subject, content, create_date, creator, modify_date  # 각 질문 별 번호, 제목 ,내용, 생성 날짜, 작성자, 수정 날짜
 
 
-def adata(question_id):
+def adata(question_id):  # 댓글 정보 불러오기
     try:
         reqs = requests.get(urls)
         responses = reqs.json()
@@ -50,11 +50,11 @@ def adata(question_id):
         count = 0
         for x in range(len(responses)):
             setdata = {}
-            if question_id == responses[x]['question_number']:
+            if question_id == responses[x]['question_number']:  # 각 질문 별 댓글 처리
                 count += 1
-                setdata['answer_number'] = responses[x]['answer_number']
-                setdata['content'] = responses[x]['content']
-                setdata['create_date'] = responses[x]['create_date']
+                setdata['answer_number'] = responses[x]['answer_number']  # 댓글 번호
+                setdata['content'] = responses[x]['content']  # 내용
+                setdata['create_date'] = responses[x]['create_date']  # 작성 날짜
                 setdata['question_number'] = responses[x]['question_number']
                 if not is_date_format(setdata['create_date']):
                     create_dates = datetime.fromisoformat(setdata['create_date'])
@@ -75,7 +75,7 @@ def adata(question_id):
     return answer, count
 
 
-def count(question_id):
+def count(question_id):  # 질문 별 댓글 숫자 확인
     try:
         reqs = requests.get(urls)
         responses = reqs.json()
@@ -84,7 +84,7 @@ def count(question_id):
         return None
 
 
-def is_date_format(string):
+def is_date_format(string):  # ISO 시간 값 확인
     try:
         datetime.strptime(string, "%Y년 %m월 %d일 %H시 %M분")
         return True
@@ -92,7 +92,7 @@ def is_date_format(string):
         return False
 
 
-def change_datetime_format(date_string):
+def change_datetime_format(date_string):  # ISO 시간 값을 년.월.일.시.분으로 변환
     if date_string:
         try:
             date_obj = datetime.fromisoformat(date_string)
@@ -166,7 +166,7 @@ def detail(request, question_number):
 
         answer, count = adata(question_number)
         id, subject, content, create_date, creator, modify_date = qdata(question_number)
-        print(creator)
+
         if 'session' in request.COOKIES:
             body = {}
             body['session'] = request.COOKIES['session']

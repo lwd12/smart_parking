@@ -19,13 +19,13 @@ headers = {
 body = {}
 
 
-def visitchange():
+def visitchange():  # 방문자 정보 가져오기
     try:
         response = requests.get(urls).json()
     except ConnectTimeout:
         response = []
 
-    for record in response:
+    for record in response:  # ISO 시간 형태를 년.월.일로 수정
         car_in = record['visitor_information_datetime']
         if car_in and not is_date_format(car_in):
             car_in_dt = datetime.fromisoformat(car_in)
@@ -39,7 +39,7 @@ def visitchange():
     return sorted(response, key=lambda x: x['visitor_information_number'], reverse=True)
 
 
-def unauthchange():
+def unauthchange():  # 비인가 차량 정보
     try:
         req = requests.get(url)
         response = req.json()
@@ -58,7 +58,7 @@ def unauthchange():
             data['exitdatetime'] = dt.strftime('%Y년 %m월 %d일')
 
         unauthorized_carnumber = data.get('unauthorized_carnumber')
-        if unauthorized_carnumber:
+        if unauthorized_carnumber:  # 차량 사진 데이터 불러오고 static 파일에 차량 번호로 저장하기
             base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../static/images')
             os.makedirs(base_dir, exist_ok=True)
             image_path = os.path.join(base_dir, f'{data["unauthorized_carnumbers"]}.png')
@@ -68,9 +68,7 @@ def unauthchange():
     return sorted(response, key=lambda x: x['parking_log_number'], reverse=True)
 
 
-
-
-def is_date_format(string):
+def is_date_format(string):  # ISO 시간 형태 맞는지 확인
     try:
         datetime.strptime(string, "%Y년 %m월 %d일 %H시 %M분")
         return True
@@ -78,14 +76,14 @@ def is_date_format(string):
         return False
 
 
-def remove_png_files(folder_path):
+def remove_png_files(folder_path):  # 사진 데이터 쌓이지 않게 불러올 때 삭제 하기
     for file_name in os.listdir(folder_path):
         if file_name.endswith('.png'):
             file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
 
 
-def filter_by_keyword(data, keyword):
+def filter_by_keyword(data, keyword):  # 검색 시 정보 찾기
     filtered_data = []
     for x in data:
         new_dict = {k: v for k, v in x.items() if k != 'visitor_information_number'}
@@ -119,9 +117,11 @@ def get_context_data(request):
             'visitor_list': visit_page_obj,
             'page1': request.GET.get('page1', '1'),
             'kw1': visit_kw,
+
             'unauthorized_list': unauthorized_page_obj,
             'page2': request.GET.get('page2', '1'),
             'kw2': unauthorized_kw,
+
             'username': data['username'],
         }
 
@@ -134,7 +134,7 @@ def visitor(request):
         return redirect('common:login')
 
 
-def delete(request, visitor_information_number):
+def delete(request, visitor_information_number):  # 방문자 정보 삭제
     if 'session' in request.COOKIES:
         print(visitor_information_number)
         API_HOST = "http://192.168.0.19:9000/"

@@ -7,7 +7,7 @@ SESSION_URL = f'{API_HOST}/SessionData/'
 
 
 def parking(request):
-    if request.method == 'GET':
+    if request.method == 'GET':  # 세션 여부 확인
         session_id = request.COOKIES.get('session')
         if not session_id:
             return redirect('common:login')

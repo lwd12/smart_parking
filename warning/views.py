@@ -9,7 +9,7 @@ API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
 DATE_FORMAT = '%Y년 %m월 %d일 %H시 %M분'
 
 
-def is_date_format(date_string):
+def is_date_format(date_string):  # 데이터 형식 확인
     try:
         datetime.strptime(date_string, DATE_FORMAT)
         return True
@@ -17,7 +17,7 @@ def is_date_format(date_string):
         return False
 
 
-def change(url):
+def change(url):  # 시간 형식 수정하고 시간의 순서에 따라 정렬
     try:
         response = requests.get(url).json()
         sorted_data = []

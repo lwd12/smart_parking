@@ -1,8 +1,8 @@
-
 from django.shortcuts import render, redirect, resolve_url
 from datetime import datetime
 from .SendApi import send_api
 import requests
+
 API_HOST = "http://192.168.0.19:9000"
 API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
 url = 'http://192.168.0.19:9000/answer/'
@@ -13,7 +13,9 @@ headers = {
     "Accept": "*/*",
 }
 body = {}
-def answer_create(request, question_number):
+
+
+def answer_create(request, question_number):  # 댓글 생성
     now = datetime.now()
     iso_time = now.isoformat()
     if request.method == 'POST':
@@ -23,31 +25,29 @@ def answer_create(request, question_number):
             responses = requests.post(API_HOST2, data=session)
             data = responses.json()
 
-            body['content'] = request.POST.get('content')
-            body['create_date'] = iso_time
-            body['creator'] = data['username']
-            body['modify_date'] = None
-            body['question_number'] = question_number
+            body['content'] = request.POST.get('content')  # 내용
+            body['create_date'] = iso_time  # 작성 시간
+            body['creator'] = data['username']  # 작성자
+            body['modify_date'] = None  # 수정 시간
+            body['question_number'] = question_number  # 질문 번호
             send_api(API_HOST, "/answer/", "POST", headers, body)
             return redirect('pybo:detail', question_number=question_number)
         else:
             return redirect('common:login')
 
 
-def answer_modify(request, answer_number):
-
+def answer_modify(request, answer_number):  # 댓글 수정
     now = datetime.now()
     iso_time = now.isoformat()
     req = requests.get(url)
     response = req.json()
     if request.method == 'GET':
         if 'session' in request.COOKIES:
-            session = {}
-            session['session'] = request.COOKIES['session']
+            session = {'session': request.COOKIES['session']}
             responses = requests.post(API_HOST2, data=session)
             data = responses.json()
             for x in range(len(response)):
-                if answer_number == response[x]['answer_number']:
+                if answer_number == response[x]['answer_number']:  # 선택한 댓글 내용 불러오기
                     content = response[x]['content']
                     context = {
                         'username': data['username'],
@@ -67,11 +67,9 @@ def answer_modify(request, answer_number):
                 if answer_number == response[x]['answer_number']:
                     question_number = response[x]['question_number']
             return redirect('{}#answer_{}'.format(
-                        resolve_url('pybo:detail', question_number=question_number), answer_number))
+                resolve_url('pybo:detail', question_number=question_number), answer_number))
         else:
             return redirect('common:login')
-
-
 
 
 def answer_delete(request, answer_number):
@@ -86,5 +84,3 @@ def answer_delete(request, answer_number):
 
     else:
         return redirect('common:login')
-
-

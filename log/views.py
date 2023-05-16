@@ -9,7 +9,7 @@ urls = 'http://192.168.0.19:9000/unauthorized_parkinglot/'
 API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
 
 
-def get_data_from_api(url, excluded_keys):
+def get_data_from_api(url, excluded_keys):  # 데이터 가져오기
     req = requests.get(url)
     response = req.json()
 
@@ -17,7 +17,7 @@ def get_data_from_api(url, excluded_keys):
     return response
 
 
-def is_valid_date_format(string):
+def is_valid_date_format(string):  # 시간 데이터 형식 확인
     try:
         datetime.strptime(string, "%Y년 %m월 %d일 %H시 %M분")
         return True
@@ -27,14 +27,15 @@ def is_valid_date_format(string):
 
 def change():
     try:
+        # 가져온 데이터 중에 필요없는 데이터 제거
         response = get_data_from_api(url, ['typeofentrysandexit'])
         responses = get_data_from_api(urls, ['unauthorized_carnumber',
                                              'residents_doorpasswd', 'residest_number', 'typeofentrysandexit'])
         qdata = response + responses
-
+        # 시간 순서대로 정렬
         sorted_data = sorted((x for x in qdata if x['entrydatetime'] or x['exitdatetime']),
                              key=lambda x: x['entrydatetime'] or x['exitdatetime'], reverse=True)
-
+        # ISO 데이터 형식을 년.월.일.시.분으로 변환
         for x, data in enumerate(sorted_data):
             entrydatetime = data['entrydatetime']
             if entrydatetime is not None:
@@ -76,7 +77,7 @@ def index(request):
                 if kw in str(value):
                     results.append(x)
                     break
-        if kw:
+        if kw:  # 검색 데이터가 있을 시에 작동
             repon = results
         else:
             repon = [{**x, **new_dict} for x, new_dict in zip(repon, results)]

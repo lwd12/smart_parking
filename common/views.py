@@ -17,7 +17,6 @@ urlx = 'http://192.168.0.19:9000/answer/'
 API_HOST = 'http://192.168.0.19:9000/RegistUser/'
 API_HOST2 = 'http://192.168.0.19:9000/loginforAdministrator/'
 
-
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
     "Content-Type": "application/json",
@@ -27,7 +26,7 @@ headers = {
 body = {}
 
 
-def is_date_format(string):
+def is_date_format(string):  # 시간 데이터 형식 확인
     try:
         datetime.strptime(string, "%Y년 %m월 %d일 %H시 %M분")
         return True
@@ -35,7 +34,7 @@ def is_date_format(string):
         return False
 
 
-def change():
+def change():  # ISO 타입 시간 데이터를 년.월.일.시.분으로 변환
     try:
         reqs = requests.get(urls)
         responses = reqs.json()
@@ -55,7 +54,7 @@ def change():
     return sorted_data
 
 
-def Adata(question_id):
+def Adata(question_id):  # 각 질문 별 답 갯수 카운트
     try:
         reqx = requests.get(urlx)
         responsex = reqx.json()
@@ -69,7 +68,7 @@ def Adata(question_id):
 
 
 def login_api(request):
-    if request.method == 'GET':
+    if request.method == 'GET':  # 세션 확인
         context = {'error_message': False}
         if 'session' in request.COOKIES:
             return redirect('pybo:index')
@@ -78,6 +77,7 @@ def login_api(request):
 
     if request.method == "POST":
         data = {}
+        # 폼에서 ID와 PW를 받아서 암호화
         login_ID = request.POST.get('login_ID')
         login_PassWd = request.POST.get('login_PassWd')
         hashed = hashlib.sha256()
@@ -117,14 +117,14 @@ def login_api(request):
             return render(request, 'common/login.html')
 
 
-def logout(request):
+def logout(request):  # 세션 데이터 삭제
     response = HttpResponseRedirect('login')
     response.delete_cookie('session')
 
     return response
 
 
-def signup(request):
+def signup(request):  # 회원 가입
     if request.method == 'GET':
         if 'session' in request.COOKIES:
             context = {
@@ -137,10 +137,11 @@ def signup(request):
         return render(request, 'common/signup.html', context)
 
     if request.method == "POST":
+        # 폼에서 ID,PW,email 받아오기
         login_ID = request.POST.get('username')
         login_PassWd = request.POST.get('password')
         email = request.POST.get('email')
-
+        # 로그인 조건 ID는 15자 미만, PW는 특수문자 1개 이상,숫자 영어 혼용
         if not 8 <= len(login_ID) < 15:
             context = {'error_message': '아이디의 길이가 맞지 않습니다.'}
             return render(request, 'common/signup.html', context)
@@ -149,7 +150,7 @@ def signup(request):
         if not re.match(pattern, login_PassWd):
             context = {'error_message': '비밀번호 형식이 맞지 않습니다.'}
             return render(request, 'common/signup.html', context)
-
+        # PW 암호화
         hashed_password = hashlib.sha256(login_PassWd.encode('utf-8')).hexdigest()
 
         body = {'login_ID': login_ID, 'login_PassWd': hashed_password, 'email': email}
