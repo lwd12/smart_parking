@@ -128,15 +128,13 @@ def index(request):
             new_dict = {k: v for k, v in x.items() if
                         k not in ['question_number', 'create_datetime', 'modify_datetime']}
             new_list.append(new_dict)
-            for key in new_dict:
-                value = new_dict[key]
-                if kw in str(value):
-                    results.append(x)
-                    break
+            if kw and any(kw in str(value) for value in new_dict.values()):
+                results.append(x)
+
         if kw:
             repon = results
         else:
-            repon = [new_list[i] | repon[i] for i in range(len(repon))]
+            repon = [dict(new_dict, **x) for new_dict, x in zip(new_list, repon)]
 
         paginator = Paginator(repon, 10)
         page_obj = paginator.get_page(page)

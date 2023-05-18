@@ -83,14 +83,16 @@ def remove_png_files(folder_path):  # 사진 데이터 쌓이지 않게 불러�
             os.remove(file_path)
 
 
-def filter_by_keyword(data, keyword):  # 검색 시 정보 찾기
+def filter_by_keyword(data, keyword):
     filtered_data = []
     for x in data:
         new_dict = {k: v for k, v in x.items() if k != 'visitor_information_number'}
         if keyword in str(new_dict.values()):
             filtered_data.append(x)
-    return filtered_data if keyword else [new_dict | x for x in data]
-
+    if keyword:
+        return filtered_data
+    else:
+        return [dict(new_dict, **x) for x in data]
 
 def get_context_data(request):
     remove_png_files(
