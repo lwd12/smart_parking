@@ -4,9 +4,7 @@ import requests
 from datetime import datetime
 from requests.exceptions import ConnectTimeout
 
-url = 'http://192.168.0.19:9000/entrancetotheparkinglot/'
-urls = 'http://192.168.0.19:9000/unauthorized_parkinglot/'
-API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
+base_url = 'http://192.168.0.19:9000'
 
 
 def get_data_from_api(url, excluded_keys):  # 데이터 가져오기
@@ -25,52 +23,44 @@ def is_valid_date_format(string):  # 시간 데이터 형식 확인
         return False
 
 
+def format_datetime(datetime_str):  # is_valid_date_format 함수에서 ISO 형식 확인 후 년.월.일.시.분으로 변환
+    if datetime_str is not None:
+        if is_valid_date_format(datetime_str):
+            return datetime_str
+        try:
+            datetime_obj = datetime.fromisoformat(datetime_str)
+            return datetime_obj.strftime("%Y년 %m월 %d일 %H시 %M분")
+        except ValueError:
+            pass
+    return ''
+
+
 def change():
     try:
-        # 가져온 데이터 중에 필요없는 데이터 제거
-        response = get_data_from_api(url, ['typeofentrysandexit'])
-        responses = get_data_from_api(urls, ['unauthorized_carnumber',
-                                             'residents_doorpasswd', 'residest_number', 'typeofentrysandexit'])
+        response = get_data_from_api(base_url + '/entrancetotheparkinglot/', ['typeofentrysandexit'])
+        responses = get_data_from_api(base_url + '/unauthorized_parkinglot/', ['unauthorized_carnumber',
+                                                                               'residents_doorpasswd',
+                                                                               'residest_number',
+                                                                               'typeofentrysandexit'])
         qdata = response + responses
-        # 시간 순서대로 정렬
-        sorted_data = sorted((x for x in qdata if x['entrydatetime'] or x['exitdatetime']),
+        sorted_data = sorted(filter(lambda x: x['entrydatetime'] or x['exitdatetime'], qdata),
                              key=lambda x: x['entrydatetime'] or x['exitdatetime'], reverse=True)
-        # ISO 데이터 형식을 년.월.일.시.분으로 변환
-        for x, data in enumerate(sorted_data):
-            entrydatetime = data['entrydatetime']
-            if entrydatetime is not None:
-                if not is_valid_date_format(entrydatetime):
-                    try:
-                        entrydatetime = datetime.fromisoformat(entrydatetime).strftime("%Y년 %m월 %d일 %H시 %M분")
-                    except ValueError:
-                        entrydatetime = ''
-            sorted_data[x]['entrydatetime'] = entrydatetime
-
-            exitdatetime = data['exitdatetime']
-            if exitdatetime is not None:
-                if not is_valid_date_format(exitdatetime):
-                    try:
-                        exitdatetime = datetime.fromisoformat(exitdatetime).strftime("%Y년 %m월 %d일 %H시 %M분")
-                    except ValueError:
-                        exitdatetime = ''
-            else:
-                exitdatetime = ''
-            sorted_data[x]['exitdatetime'] = exitdatetime
-
+        for data in sorted_data:
+            data['entrydatetime'] = format_datetime(data['entrydatetime'])
+            data['exitdatetime'] = format_datetime(data['exitdatetime'])
     except ConnectTimeout:
         sorted_data = []
-
-    return sorted_data or []
+    return sorted_data
 
 
 def index(request):
     if request.method == 'GET':
         page = request.GET.get('page', '1')  # 페이지
         kw = request.GET.get('kw', '')  # 검색어
-        repon = change()
+        repo = change()
 
         results = []
-        for x in repon:
+        for x in repo:
             new_dict = {k: v for k, v in x.items()}
             for key in new_dict:
                 value = new_dict[key]
@@ -78,15 +68,15 @@ def index(request):
                     results.append(x)
                     break
         if kw:  # 검색 데이터가 있을 시에 작동
-            repon = results
+            repo = results
         else:
-            repon = [{**x, **new_dict} for x, new_dict in zip(repon, results)]
+            repo = [{**x, **new_dict} for x, new_dict in zip(repo, results)]
 
-        paginator = Paginator(repon, 10)
+        paginator = Paginator(repo, 10)
         page_obj = paginator.get_page(page)
         if 'session' in request.COOKIES:
             session = {'session': request.COOKIES['session']}
-            responses = requests.post(API_HOST2, data=session)
+            responses = requests.post(base_url + '/SessionData/', data=session)
             data = responses.json()
             context = {
                 'carlog_list': page_obj,

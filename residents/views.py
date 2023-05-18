@@ -4,11 +4,9 @@ import requests
 from .SendApi import send_api
 from requests.exceptions import ConnectTimeout
 from django.http import Http404
+import concurrent.futures
 
-API_HOST = 'http://192.168.0.19:9000/residents_information/'
-API_HOST2 = "http://192.168.0.19:9000"
-API_HOST3 = 'http://192.168.0.19:9000/SessionData/'
-
+base_url = 'http://192.168.0.19:9000'
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
     "Content-Type": "application/json",
@@ -19,7 +17,7 @@ headers = {
 
 def get_residents():  # 입주민 정보 가져오기
     try:
-        req = requests.get(API_HOST)
+        req = requests.get(base_url + '/residents_information/')
         response = req.json()
     except ConnectTimeout:
         response = {}
@@ -44,9 +42,8 @@ def paginate_residents(request, response):
 
 def get_session(request):  # 세션 정보 확인
     if 'session' in request.COOKIES:
-        session = {}
-        session['session'] = request.COOKIES['session']
-        responses = requests.post(API_HOST3, data=session)
+        session = {'session': request.COOKIES['session']}
+        responses = requests.post(base_url + '/SessionData/', data=session)
         data = responses.json()
         return data['username']
     else:
@@ -99,7 +96,7 @@ def resident_sign(request):  # 회원 정보 만들기
             'login_PassWd': request.POST.get('login_PassWd'),  # 앱 비밀번호
             'resident_residency': bool(request.POST.get('resident_residency')),  # 거주 여부
         }
-        requests.post(API_HOST, data=body)
+        requests.post(base_url + '/residents_information/', data=body)
 
         response = get_residents()
         kw = request.GET.get('kw', '')
@@ -124,7 +121,7 @@ def change(request, residents_number):  # 입주민 정보 수정
         return redirect('common:login')
 
     session = {'session': request.COOKIES['session']}
-    username_response = requests.post(API_HOST3, data=session)
+    username_response = requests.post(base_url + '/SessionData/', data=session)
     username = username_response.json().get('username')
 
     residents = get_residents()
@@ -150,6 +147,6 @@ def change(request, residents_number):  # 입주민 정보 수정
             'resident_residency': bool(request.POST.get('resident_residency'))
         }
 
-        send_api(API_HOST2, f'/residents_information/{residents_number}', 'PUT', headers, body)
+        send_api(base_url, f'/residents_information/{residents_number}', 'PUT', headers, body)
 
         return redirect('residents:residents')

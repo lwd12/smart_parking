@@ -4,8 +4,8 @@ import requests
 from requests.exceptions import ConnectTimeout
 from datetime import datetime
 
-url = 'http://192.168.0.19:9000/safetyaccident/'
-API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
+base_url = 'http://192.168.0.19:9000'
+
 DATE_FORMAT = '%Y년 %m월 %d일 %H시 %M분'
 
 
@@ -19,7 +19,7 @@ def is_date_format(date_string):  # 데이터 형식 확인
 
 def change(url):  # 시간 형식 수정하고 시간의 순서에 따라 정렬
     try:
-        response = requests.get(url).json()
+        response = requests.get(base_url + '/safetyaccident/').json()
         sorted_data = []
         for item in response:
             date_string = item['safetyaccident_datetime']
@@ -36,7 +36,7 @@ def change(url):  # 시간 형식 수정하고 시간의 순서에 따라 정렬
 
 def warnings(request):
     if request.method == 'GET':
-        response = change(url)
+        response = change(base_url + '/safetyaccident/')
 
         page = request.GET.get('page', '1')
         kw = request.GET.get('kw', '')
@@ -45,7 +45,7 @@ def warnings(request):
 
         if 'session' in request.COOKIES:
             session = {'session': request.COOKIES['session']}
-            response = requests.post(API_HOST2, data=session).json()
+            response = requests.post(base_url + '/SessionData/', data=session).json()
             username = response.get('username', '')
             context = {
                 'warning_list': page_obj,

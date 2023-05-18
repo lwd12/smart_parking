@@ -7,6 +7,8 @@ import base64
 import os
 from .SendApi import send_api
 
+base_url = 'http://192.168.0.19:9000'
+
 url = 'http://192.168.0.19:9000/unauthorized_parking/'
 urls = 'http://192.168.0.19:9000/visitor_information/'
 API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
@@ -21,7 +23,7 @@ body = {}
 
 def visitchange():  # 방문자 정보 가져오기
     try:
-        response = requests.get(urls).json()
+        response = requests.get(base_url + '/visitor_information/').json()
     except ConnectTimeout:
         response = []
 
@@ -41,7 +43,7 @@ def visitchange():  # 방문자 정보 가져오기
 
 def unauthchange():  # 비인가 차량 정보
     try:
-        req = requests.get(url)
+        req = requests.get(base_url + '/unauthorized_parking/')
         response = req.json()
     except ConnectTimeout:
         response = []
@@ -111,7 +113,7 @@ def get_context_data(request):
 
     if 'session' in request.COOKIES:
         session = {'session': request.COOKIES['session']}
-        responses = requests.post(API_HOST2, data=session)
+        responses = requests.post(base_url + '/SessionData/', data=session)
         data = responses.json()
         return {
             'visitor_list': visit_page_obj,
@@ -136,9 +138,8 @@ def visitor(request):
 
 def delete(request, visitor_information_number):  # 방문자 정보 삭제
     if 'session' in request.COOKIES:
-        print(visitor_information_number)
-        API_HOST = "http://192.168.0.19:9000/"
-        send_api(API_HOST, f"visitor_information/{visitor_information_number}", "DELETE", headers, body)
+
+        send_api(base_url, f"visitor_information/{visitor_information_number}", "DELETE", headers, body)
         return redirect('visitor:visitor')
     else:
         return redirect('common:login')

@@ -7,16 +7,7 @@ from django.core.paginator import Paginator
 from requests.exceptions import ConnectTimeout
 import hashlib
 
-url = 'http://192.168.0.19:9000/loginforAdministrator/'
-
-urls = 'http://192.168.0.19:9000/question/'
-
-urlx = 'http://192.168.0.19:9000/answer/'
-
-# 호출 예시
-API_HOST = 'http://192.168.0.19:9000/RegistUser/'
-API_HOST2 = 'http://192.168.0.19:9000/loginforAdministrator/'
-
+base_url = 'http://192.168.0.19:9000'
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
     "Content-Type": "application/json",
@@ -36,7 +27,7 @@ def is_date_format(string):  # 시간 데이터 형식 확인
 
 def change():  # ISO 타입 시간 데이터를 년.월.일.시.분으로 변환
     try:
-        reqs = requests.get(urls)
+        reqs = requests.get(base_url + '/question/')
         responses = reqs.json()
         QData = responses
         sorted_data = []
@@ -56,7 +47,7 @@ def change():  # ISO 타입 시간 데이터를 년.월.일.시.분으로 변환
 
 def Adata(question_id):  # 각 질문 별 답 갯수 카운트
     try:
-        reqx = requests.get(urlx)
+        reqx = requests.get(base_url + '/answer/')
         responsex = reqx.json()
         count = 0
         for x in range(len(responsex)):
@@ -88,7 +79,7 @@ def login_api(request):
         hashed.update(login_ID.encode('utf-8'))
         body['seesion'] = hashed.hexdigest()
         try:
-            responses = requests.post(API_HOST2, data=body)
+            responses = requests.post(base_url + '/loginforAdministrator/', data=body)
             data = responses.json()
         except ConnectTimeout:
             data['error'] = "로그인 성공"
@@ -127,39 +118,36 @@ def logout(request):  # 세션 데이터 삭제
 def signup(request):  # 회원 가입
     if request.method == 'GET':
         if 'session' in request.COOKIES:
-            context = {
-                'username': request.COOKIES['username'],
-                'login_status': request.COOKIES.get('login_status'),
-            }
-            return render(request, 'pybo/question_list.html', context)
-
-        context = {'error_message': False}
-        return render(request, 'common/signup.html', context)
+            return redirect('pybo:index')
+        else:
+            return render(request, 'common/signup.html')
 
     if request.method == "POST":
         # 폼에서 ID,PW,email 받아오기
+        context = {}
+        respond = render(request, 'common/signup.html', context)
         login_ID = request.POST.get('username')
         login_PassWd = request.POST.get('password')
         email = request.POST.get('email')
         # 로그인 조건 ID는 15자 미만, PW는 특수문자 1개 이상,숫자 영어 혼용
         if not 8 <= len(login_ID) < 15:
             context = {'error_message': '아이디의 길이가 맞지 않습니다.'}
-            return render(request, 'common/signup.html', context)
+            return respond
 
         pattern = r"^(?=.*[!@#$%^&*(),.?\":{}|<>])(?=.*\d)(?=.*[a-zA-Z]).{8,19}$"
         if not re.match(pattern, login_PassWd):
             context = {'error_message': '비밀번호 형식이 맞지 않습니다.'}
-            return render(request, 'common/signup.html', context)
+            return respond
         # PW 암호화
         hashed_password = hashlib.sha256(login_PassWd.encode('utf-8')).hexdigest()
 
         body = {'login_ID': login_ID, 'login_PassWd': hashed_password, 'email': email}
-        response = requests.post(API_HOST, data=body)
+        response = requests.post(base_url + '/RegistUser/', data=body)
         data = response.json()
 
         if data.get('error'):
             context = {'error_message': data['error']}
-            return render(request, 'common/signup.html', context)
+            return respond
 
         page = request.GET.get('page', '1')  # 페이지
         kw = request.GET.get('kw', '')  # 검색어

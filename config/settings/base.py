@@ -20,6 +20,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'alarm.apps.AlarmConfig',
     'residents.apps.ResidentsConfig',
     'warning.apps.WarningConfig',
     'visitor.apps.VisitorConfig',

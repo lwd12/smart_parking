@@ -4,16 +4,12 @@ import requests
 from datetime import datetime
 from requests.exceptions import ConnectTimeout
 
-url = 'http://192.168.0.19:9000/question/'
-
-urls = 'http://192.168.0.19:9000/answer/'
-
-API_HOST = 'http://192.168.0.19:9000/SessionData/'
+base_url = 'http://192.168.0.19:9000'
 
 
 def qdata(question_number):  # 질문 정보 불러오고 처리하기
     try:
-        req = requests.get(url)
+        req = requests.get(base_url + '/question/')
         response = req.json()
 
         for x in range(len(response)):
@@ -44,7 +40,7 @@ def qdata(question_number):  # 질문 정보 불러오고 처리하기
 
 def adata(question_id):  # 댓글 정보 불러오기
     try:
-        reqs = requests.get(urls)
+        reqs = requests.get(base_url + '/answer/')
         responses = reqs.json()
         answer = []
         count = 0
@@ -77,7 +73,7 @@ def adata(question_id):  # 댓글 정보 불러오기
 
 def count(question_id):  # 질문 별 댓글 숫자 확인
     try:
-        reqs = requests.get(urls)
+        reqs = requests.get(base_url + '/answer/')
         responses = reqs.json()
         return sum(1 for data in responses if data['question_number'] == question_id)
     except ConnectTimeout:
@@ -104,7 +100,7 @@ def change_datetime_format(date_string):  # ISO 시간 값을 년.월.일.시.�
 
 def change():
     try:
-        req = requests.get(url)
+        req = requests.get(base_url + '/question/')
         responses = req.json()
         sorted_data = []
         for data in responses:
@@ -148,7 +144,7 @@ def index(request):
         if 'session' in request.COOKIES:
             session = {}
             session['session'] = request.COOKIES['session']
-            responses = requests.post(API_HOST, data=session)
+            responses = requests.post(base_url + '/SessionData/', data=session)
             data = responses.json()
 
             context = {'question_list': page_obj,
@@ -168,9 +164,8 @@ def detail(request, question_number):
         id, subject, content, create_date, creator, modify_date = qdata(question_number)
 
         if 'session' in request.COOKIES:
-            body = {}
-            body['session'] = request.COOKIES['session']
-            responses = requests.post(API_HOST, data=body)
+            body = {'session': request.COOKIES['session']}
+            responses = requests.post(base_url + '/SessionData/', data=body)
             data = responses.json()
             context = {'question_number': id,
                        'question_subject': subject,

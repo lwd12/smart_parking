@@ -3,9 +3,8 @@ from datetime import datetime
 from .SendApi import send_api
 import requests
 
-API_HOST = "http://192.168.0.19:9000"
-API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
-url = 'http://192.168.0.19:9000/answer/'
+base_url = 'http://192.168.0.19:9000'
+
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
     "Content-Type": "application/json",
@@ -22,7 +21,7 @@ def answer_create(request, question_number):  # 댓글 생성
         if 'session' in request.COOKIES:
             session = {}
             session['session'] = request.COOKIES['session']
-            responses = requests.post(API_HOST2, data=session)
+            responses = requests.post(base_url + '/SessionData/', data=session)
             data = responses.json()
 
             body['content'] = request.POST.get('content')  # 내용
@@ -30,7 +29,7 @@ def answer_create(request, question_number):  # 댓글 생성
             body['creator'] = data['username']  # 작성자
             body['modify_date'] = None  # 수정 시간
             body['question_number'] = question_number  # 질문 번호
-            send_api(API_HOST, "/answer/", "POST", headers, body)
+            send_api(base_url, "/answer/", "POST", headers, body)
             return redirect('pybo:detail', question_number=question_number)
         else:
             return redirect('common:login')
@@ -44,7 +43,7 @@ def answer_modify(request, answer_number):  # 댓글 수정
     if request.method == 'GET':
         if 'session' in request.COOKIES:
             session = {'session': request.COOKIES['session']}
-            responses = requests.post(API_HOST2, data=session)
+            responses = requests.post(base_url + '/SessionData/', data=session)
             data = responses.json()
             for x in range(len(response)):
                 if answer_number == response[x]['answer_number']:  # 선택한 댓글 내용 불러오기
@@ -61,7 +60,7 @@ def answer_modify(request, answer_number):  # 댓글 수정
         if 'session' in request.COOKIES:
             body['content'] = request.POST.get('content')
             body['modify_date'] = iso_time
-            send_api(API_HOST, f"/answer/{answer_number}", "PUT", headers, body)
+            send_api(base_url, f"/answer/{answer_number}", "PUT", headers, body)
             question_number = ''
             for x in range(len(response)):
                 if answer_number == response[x]['answer_number']:
@@ -74,12 +73,12 @@ def answer_modify(request, answer_number):  # 댓글 수정
 
 def answer_delete(request, answer_number):
     if 'session' in request.COOKIES:
-        req = requests.get(url)
+        req = requests.get(base_url + '/answer/')
         response = req.json()
         for x in range(len(response)):
             if answer_number == response[x]['answer_number']:
                 question_number = response[x]['question_number']
-                send_api(API_HOST, f"/answer/{answer_number}", "DELETE", headers, body)
+                send_api(base_url, f"/answer/{answer_number}", "DELETE", headers, body)
                 return redirect('pybo:detail', question_number=question_number)
 
     else:

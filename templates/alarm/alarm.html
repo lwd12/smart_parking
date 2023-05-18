@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load pybo_filter %}
+{% block content %}
+
+<div class="text-center my-5">
+    <h1>경고 알람</h1>
+</div>
+    <table class="d-flex justify-content-center">
+    <tr>
+        <td>
+            {% if alarm_data %}
+                {% if alarm_data == 'fire' %}
+                        <img
+                            src="http://192.168.0.220:5000/video_feed"
+                            style="width: 500px; height: 500px" alt="화재 현장" class="border m-2"/>
+                {% elif alarm_data == 'rain' %}
+
+                {% elif alarm_data == 'snow' %}
+
+                {% elif alarm_data == 'storm' %}
+
+                {% endif %}
+            {% endif %}
+        </td>
+    </tr>
+    </table>
+{% endblock %}

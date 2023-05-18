@@ -3,24 +3,30 @@
 {% block content %}
 
 <div class="text-center my-5">
-    <h1>videos...</h1>
+    <h1>CCTV</h1>
 </div>
     <table class="d-flex justify-content-center">
             <tr>
                 <td>
                     <img
-                        src="http://192.168.0.231:9000/CameraIO/"
+                        src="http://192.168.0.231:8000/CameraIO/"
                         style="width: 500px; height: 500px"
-                    alt="주차장 입구"/>
+                    alt="주차장 입구" class="border m-2"/>
                 </td>
                 <td>
                     <img
-                        src="http://192.168.0.231:8000/CameraParking/"
+                        src="http://192.168.0.220:5000/video_feed"
                         style="width: 500px; height: 500px"
-                     alt="주차장 내부"/>
+                     alt="주차장 내부" class="border m-2"/>
                 </td>
-
+            </tr>
+            <tr>
+                <td>
+                    주차장 입구
+                </td>
+                <td>
+                    주차장 내부
+                </td>
             </tr>
         </table>
-
 {% endblock %}

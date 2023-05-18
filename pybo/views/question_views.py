@@ -3,23 +3,18 @@ from .SendApi import send_api
 from datetime import datetime
 import requests
 
-url = 'http://192.168.0.19:9000/question/'
-API_HOST = "http://192.168.0.19:9000"
-API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
+base_url = 'http://192.168.0.19:9000'
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
     "Content-Type": "application/json",
     "charset": "UTF-8",
     "Accept": "*/*",
 }
-body = {}
-test = {}
 
 
 def question_create(request):  # 질문 작성
-    session = {}
-    session['session'] = request.COOKIES['session']
-    responses = requests.post(API_HOST2, data=session)
+    session = {'session': request.COOKIES['session']}
+    responses = requests.post(base_url + '/SessionData/', data=session)
     data = responses.json()
     now = datetime.now()
     iso_time = now.isoformat()
@@ -34,13 +29,13 @@ def question_create(request):  # 질문 작성
 
     if request.method == 'POST':
         if 'session' in request.COOKIES:
-            body['subject'] = request.POST.get('subject')  # 제목
-            body['content'] = request.POST.get('content')  # 내용
-            body['create_datetime'] = iso_time  # 작성 시간
-            body['modify_datetime'] = None  # 수정 시간
-            body['creator'] = data['username']  # 작성자
-            body['etc'] = '공지'  # 작성 형식
-            send_api(API_HOST, "/question/", "POST", headers, body)
+            body = {'subject': request.POST.get('subject'),
+                    'content': request.POST.get('content'),
+                    'create_datetime': iso_time,
+                    'modify_datetime': None,
+                    'creator': data['username'],
+                    'etc': '공지'}
+            send_api(base_url, "/question/", "POST", headers, body)
             return redirect('pybo:index')
         else:
             return redirect('common:login')
@@ -49,13 +44,12 @@ def question_create(request):  # 질문 작성
 def question_modify(request, question_number):  # 질문 수정
     now = datetime.now()
     iso_time = now.isoformat()
-    req = requests.get(url)
+    req = requests.get(base_url + '/question/')
     response = req.json()
     if request.method == 'GET':
         if 'session' in request.COOKIES:
-            session = {}
-            session['session'] = request.COOKIES['session']
-            responses = requests.post(API_HOST2, data=session)
+            session = {'session': request.COOKIES['session']}
+            responses = requests.post(base_url + '/SessionData/', data=session)
             data = responses.json()
             for x in range(len(response)):
                 if question_number == response[x]['question_number']:
@@ -72,11 +66,11 @@ def question_modify(request, question_number):  # 질문 수정
             return redirect('common:login')
     if request.method == "POST":
         if 'session' in request.COOKIES:
-            body['subject'] = request.POST.get('subject')
-            body['content'] = request.POST.get('content')
-            body['modify_datetime'] = iso_time
-            print(body)
-            send_api(API_HOST, f"/question/{question_number}", "PUT", headers, body)
+            body = {'subject': request.POST.get('subject'),
+                    'content': request.POST.get('content'),
+                    'modify_datetime': iso_time}
+
+            send_api(base_url, f"/question/{question_number}", "PUT", headers, body)
             return redirect('/pybo/{}/#question_{}'.format(question_number, question_number))
         else:
             return redirect('common:login')
@@ -84,7 +78,7 @@ def question_modify(request, question_number):  # 질문 수정
 
 def question_delete(request, question_number):  # 질문 삭제
     if 'session' in request.COOKIES:
-        send_api(API_HOST, f"/question/{question_number}", "DELETE", headers, body)
+        send_api(base_url, f"/question/{question_number}", "DELETE", headers, body)
         return redirect('pybo:index')
     else:
         return redirect('common:login')
