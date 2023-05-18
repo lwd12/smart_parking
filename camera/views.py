@@ -5,7 +5,7 @@ import cv2
 import threading
 import requests
 
-API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
+API_HOST2 = 'http://3.34.74.107:8000/SessionData/'
 
 
 def camera(request):

@@ -4,7 +4,7 @@ import webbrowser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-base_url = 'http://192.168.0.19:9000'
+base_url = 'http://3.34.74.107:8000/'
 
 state_data = {'state': 'fire'}
 

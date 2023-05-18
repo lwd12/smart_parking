@@ -7,11 +7,8 @@ import base64
 import os
 from .SendApi import send_api
 
-base_url = 'http://192.168.0.19:9000'
+base_url = 'http://3.34.74.107:8000'
 
-url = 'http://192.168.0.19:9000/unauthorized_parking/'
-urls = 'http://192.168.0.19:9000/visitor_information/'
-API_HOST2 = 'http://192.168.0.19:9000/SessionData/'
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
     "Content-Type": "application/json",

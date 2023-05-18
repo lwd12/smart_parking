@@ -3,7 +3,7 @@ from datetime import datetime
 from .SendApi import send_api
 import requests
 
-base_url = 'http://192.168.0.19:9000'
+base_url = 'http://3.34.74.107:8000'
 
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값

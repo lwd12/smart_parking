@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from requests.exceptions import ConnectTimeout
 import hashlib
 
-base_url = 'http://192.168.0.19:9000'
+base_url = 'http://3.34.74.107:8000'
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
     "Content-Type": "application/json",

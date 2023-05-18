@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 import requests
 
-API_HOST = 'http://192.168.0.19:9000'
+API_HOST = 'http://3.34.74.107:8000'
 
 
 def parking(request):

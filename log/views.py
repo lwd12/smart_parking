@@ -4,7 +4,7 @@ import requests
 from datetime import datetime
 from requests.exceptions import ConnectTimeout
 
-base_url = 'http://192.168.0.19:9000'
+base_url = 'http://3.34.74.107:8000'
 
 
 def get_data_from_api(url, excluded_keys):  # 데이터 가져오기

@@ -4,7 +4,7 @@ import requests
 from requests.exceptions import ConnectTimeout
 from datetime import datetime
 
-base_url = 'http://192.168.0.19:9000'
+base_url = 'http://3.34.74.107:8000'
 
 DATE_FORMAT = '%Y년 %m월 %d일 %H시 %M분'
 
