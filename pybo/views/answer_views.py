@@ -19,8 +19,7 @@ def answer_create(request, question_number):  # 댓글 생성
     iso_time = now.isoformat()
     if request.method == 'POST':
         if 'session' in request.COOKIES:
-            session = {}
-            session['session'] = request.COOKIES['session']
+            session = {'session': request.COOKIES['session']}
             responses = requests.post(base_url + '/SessionData/', data=session)
             data = responses.json()
 
@@ -29,6 +28,7 @@ def answer_create(request, question_number):  # 댓글 생성
             body['creator'] = data['username']  # 작성자
             body['modify_date'] = None  # 수정 시간
             body['question_number'] = question_number  # 질문 번호
+            print(body)
             send_api(base_url, "/answer/", "POST", headers, body)
             return redirect('pybo:detail', question_number=question_number)
         else:
@@ -38,7 +38,7 @@ def answer_create(request, question_number):  # 댓글 생성
 def answer_modify(request, answer_number):  # 댓글 수정
     now = datetime.now()
     iso_time = now.isoformat()
-    req = requests.get(url)
+    req = requests.get(base_url + '/answer/')
     response = req.json()
     if request.method == 'GET':
         if 'session' in request.COOKIES:

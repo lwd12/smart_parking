@@ -66,11 +66,13 @@ def question_modify(request, question_number):  # 질문 수정
             return redirect('common:login')
     if request.method == "POST":
         if 'session' in request.COOKIES:
+
             body = {'subject': request.POST.get('subject'),
                     'content': request.POST.get('content'),
                     'modify_datetime': iso_time}
-
+            print(body)
             send_api(base_url, f"/question/{question_number}", "PUT", headers, body)
+
             return redirect('/pybo/{}/#question_{}'.format(question_number, question_number))
         else:
             return redirect('common:login')
@@ -78,6 +80,7 @@ def question_modify(request, question_number):  # 질문 수정
 
 def question_delete(request, question_number):  # 질문 삭제
     if 'session' in request.COOKIES:
+        body = {}
         send_api(base_url, f"/question/{question_number}", "DELETE", headers, body)
         return redirect('pybo:index')
     else:
