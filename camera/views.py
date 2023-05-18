@@ -5,14 +5,14 @@ import cv2
 import threading
 import requests
 
-API_HOST2 = 'http://3.34.74.107:8000/SessionData/'
+API_HOST = 'http://3.34.74.107:8000/SessionData/'
 
 
 def camera(request):
     if 'session' in request.COOKIES:  # 세션 여부 확인
         session = {}
         session['session'] = request.COOKIES['session']
-        responses = requests.post(API_HOST2, data=session)
+        responses = requests.post(API_HOST, data=session)
         data = responses.json()
         context = {
             'username': data['username'],

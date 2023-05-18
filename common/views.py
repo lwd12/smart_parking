@@ -167,4 +167,12 @@ def signup(request):  # 회원 가입
 
 
 def page_not_found(request, exception):
-    return render(request, 'common/404.html', {})
+    if 'session' in request.COOKIES:  # 세션 여부 확인
+        session = {}
+        session['session'] = request.COOKIES['session']
+        responses = requests.post(base_url + '/SessionData/', data=session)
+        data = responses.json()
+        context = {
+            'username': data['username'],
+        }
+    return render(request, 'common/404.html', context)
