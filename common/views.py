@@ -6,7 +6,7 @@ import re
 from django.core.paginator import Paginator
 from requests.exceptions import ConnectTimeout
 import hashlib
-
+from dateutil import parser
 base_url = 'http://3.34.74.107:8000'
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
@@ -25,7 +25,7 @@ def is_date_format(string):  # 시간 데이터 형식 확인
         return False
 
 
-def change():  # ISO 타입 시간 데이터를 년.월.일.시.분으로 변환
+def change():
     try:
         reqs = requests.get(base_url + '/question/')
         responses = reqs.json()
@@ -34,8 +34,8 @@ def change():  # ISO 타입 시간 데이터를 년.월.일.시.분으로 변환
         for x in range(len(QData)):
             create_date = QData[x]['create_datetime']
             if not is_date_format(create_date):
-                create_dates = datetime.fromisoformat(create_date)
-                create_date = create_dates.strftime("%Y년 %m월 %d일 %H시 %M분")
+                create_date = parser.parse(create_date)
+                create_date = create_date.strftime("%Y년 %m월 %d일 %H시 %M분")
             QData[x]['create_datetime'] = create_date
             QData[x]['count'] = Adata(QData[x]['question_number'])
             if QData:
@@ -140,8 +140,9 @@ def signup(request):  # 회원 가입
             return respond
         # PW 암호화
         hashed_password = hashlib.sha256(login_PassWd.encode('utf-8')).hexdigest()
-
-        body = {'login_ID': login_ID, 'login_PassWd': hashed_password, 'email': email}
+        hashed_session = hashlib.sha256(login_ID.encode('utf-8')).hexdigest()
+        body = {'login_ID': login_ID, 'login_PassWd': hashed_password, 'email': email, 'session': hashed_session}
+        print()
         response = requests.post(base_url + '/RegistUser/', data=body)
         data = response.json()
 

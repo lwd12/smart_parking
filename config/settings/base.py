@@ -17,6 +17,7 @@ SECRET_KEY = 'django-insecure-e@)1$t2b8-0ior$grirkeb6vnemb%5((_xyo#1a1!0l+(_pp&l
 
 ALLOWED_HOSTS = ["*"]
 DEBUG = False
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -127,7 +128,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
    os.path.join(BASE_DIR, 'static')
 ]
-
+STATIC_ROOT = '/static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -141,8 +142,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'
 # 로그아웃시 이동하는 URL
 LOGOUT_REDIRECT_URL = '/common/login'
-INSTALLED_APPS += ["encrypted_fields"]
-
-FIELD_ENCRYPTION_KEYS = [
-    "f164ec6bd6fbc4aef5647abc15199da0f9badcc1d2127bde2087ae0d794a9a0b"
-]

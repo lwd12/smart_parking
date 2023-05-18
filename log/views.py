@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 import requests
 from datetime import datetime
 from requests.exceptions import ConnectTimeout
-
+from dateutil import parser
 base_url = 'http://3.34.74.107:8000'
 
 
@@ -28,7 +28,7 @@ def format_datetime(datetime_str):  # is_valid_date_format 함수에서 ISO 형�
         if is_valid_date_format(datetime_str):
             return datetime_str
         try:
-            datetime_obj = datetime.fromisoformat(datetime_str)
+            datetime_obj = parser.parse(datetime_str)
             return datetime_obj.strftime("%Y년 %m월 %d일 %H시 %M분")
         except ValueError:
             pass

@@ -6,6 +6,7 @@ from requests.exceptions import ConnectTimeout
 import base64
 import os
 from .SendApi import send_api
+from dateutil import parser
 
 base_url = 'http://3.34.74.107:8000'
 
@@ -27,12 +28,12 @@ def visitchange():  # 방문자 정보 가져오기
     for record in response:  # ISO 시간 형태를 년.월.일로 수정
         car_in = record['visitor_information_datetime']
         if car_in and not is_date_format(car_in):
-            car_in_dt = datetime.fromisoformat(car_in)
+            car_in_dt = parser.parse(car_in)
             record['visitor_information_datetime'] = car_in_dt.strftime("%Y년 %m월 %d일")
 
         request_date = record['visitor_information_date']
         if request_date and not is_date_format(request_date):
-            request_date_dt = datetime.fromisoformat(request_date)
+            request_date_dt = parser.parse(request_date)
             record['visitor_information_date'] = request_date_dt.strftime("%Y년 %m월 %d일")
 
     return sorted(response, key=lambda x: x['visitor_information_number'], reverse=True)
@@ -48,12 +49,12 @@ def unauthchange():  # 비인가 차량 정보
     for data in response:
         entry_datetime = data.get('entrydatetime')
         if entry_datetime and not is_date_format(entry_datetime):
-            dt = datetime.fromisoformat(entry_datetime)
+            dt = parser.parse(entry_datetime)
             data['entrydatetime'] = dt.strftime('%Y년 %m월 %d일')
 
         exit_datetime = data.get('exitdatetime', '')
         if exit_datetime and not is_date_format(exit_datetime):
-            dt = datetime.fromisoformat(exit_datetime)
+            dt = parser.parse(exit_datetime)
             data['exitdatetime'] = dt.strftime('%Y년 %m월 %d일')
 
         unauthorized_carnumber = data.get('unauthorized_carnumber')

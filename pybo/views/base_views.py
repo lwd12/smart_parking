@@ -3,11 +3,11 @@ from django.shortcuts import render, redirect
 import requests
 from datetime import datetime
 from requests.exceptions import ConnectTimeout
-
+from dateutil import parser
 base_url = 'http://3.34.74.107:8000'
 
 
-def qdata(question_number):  # 질문 정보 불러오고 처리하기
+def qdata(question_number):
     try:
         req = requests.get(base_url + '/question/')
         response = req.json()
@@ -19,14 +19,14 @@ def qdata(question_number):  # 질문 정보 불러오고 처리하기
                 content = response[x]['content']
                 create_date = response[x]['create_datetime']
                 if not is_date_format(create_date):
-                    create_dates = datetime.fromisoformat(create_date)
-                    create_date = create_dates.strftime("%Y년 %m월 %d일 %H시 %M분")
+                    create_date = parser.parse(create_date)
+                    create_date = create_date.strftime("%Y년 %m월 %d일 %H시 %M분")
                 creator = response[x]['creator']
                 modify_date = response[x]['modify_datetime']
                 if modify_date:
                     if not is_date_format(modify_date):
-                        modify_dates = datetime.fromisoformat(modify_date)
-                        modify_date = modify_dates.strftime("%Y년 %m월 %d일 %H시 %M분")
+                        modify_date = parser.parse(modify_date)
+                        modify_date = modify_date.strftime("%Y년 %m월 %d일 %H시 %M분")
                 return id, subject, content, create_date, creator, modify_date
     except ConnectTimeout:
         id = None
@@ -35,7 +35,7 @@ def qdata(question_number):  # 질문 정보 불러오고 처리하기
         create_date = None
         creator = None
         modify_date = None
-        return id, subject, content, create_date, creator, modify_date  # 각 질문 별 번호, 제목 ,내용, 생성 날짜, 작성자, 수정 날짜
+        return id, subject, content, create_date, creator, modify_date
 
 
 def adata(question_id):  # 댓글 정보 불러오기
@@ -53,14 +53,14 @@ def adata(question_id):  # 댓글 정보 불러오기
                 setdata['create_date'] = responses[x]['create_date']  # 작성 날짜
                 setdata['question_number'] = responses[x]['question_number']
                 if not is_date_format(setdata['create_date']):
-                    create_dates = datetime.fromisoformat(setdata['create_date'])
+                    create_dates = parser.parse(setdata['create_date'])
                     create_date = create_dates.strftime("%Y년 %m월 %d일 %H시 %M분")
                     setdata['create_date'] = create_date
                 setdata['creator'] = responses[x]['creator']
                 setdata['modify_date'] = responses[x]['modify_date']
                 if setdata['modify_date']:
                     if not is_date_format(setdata['modify_date']):
-                        modify_dates = datetime.fromisoformat(setdata['modify_date'])
+                        modify_dates = parser.parse(setdata['modify_date'])
                         modify_date = modify_dates.strftime("%Y년 %m월 %d일 %H시 %M분")
                         setdata['modify_date'] = modify_date
                 answer.append(setdata)
@@ -91,7 +91,7 @@ def is_date_format(string):  # ISO 시간 값 확인
 def change_datetime_format(date_string):  # ISO 시간 값을 년.월.일.시.분으로 변환
     if date_string:
         try:
-            date_obj = datetime.fromisoformat(date_string)
+            date_obj = parser.parse(date_string)
             return date_obj.strftime("%Y년 %m월 %d일 %H시 %M분")
         except ValueError:
             pass

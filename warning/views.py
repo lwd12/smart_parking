@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 import requests
 from requests.exceptions import ConnectTimeout
 from datetime import datetime
-
+from dateutil import parser
 base_url = 'http://3.34.74.107:8000'
 
 DATE_FORMAT = '%Y년 %m월 %d일 %H시 %M분'
@@ -24,7 +24,7 @@ def change(url):  # 시간 형식 수정하고 시간의 순서에 따라 정렬
         for item in response:
             date_string = item['safetyaccident_datetime']
             if date_string and not is_date_format(date_string):
-                date_obj = datetime.fromisoformat(date_string)
+                date_obj = parser.parse(date_string)
                 date_string = date_obj.strftime(DATE_FORMAT)
                 item['safetyaccident_datetime'] = date_string
         if response:
