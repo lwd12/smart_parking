@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from requests.exceptions import ConnectTimeout
 import hashlib
 from dateutil import parser
+
 base_url = 'http://3.34.74.107:8000'
 headers = {
     # "Authorization": "ToKen 750b311fec4b7c0a2a023bd557a149fb1f3a5085",  # 토큰값
@@ -177,3 +178,17 @@ def page_not_found(request, exception):
             'username': data['username'],
         }
     return render(request, 'common/404.html', context)
+
+
+def handler500(request):
+    if 'session' in request.COOKIES:  # 세션 여부 확인
+        session = {}
+        session['session'] = request.COOKIES['session']
+        responses = requests.post(base_url + '/SessionData/', data=session)
+        data = responses.json()
+        context = {
+            'username': data['username'],
+        }
+    response = render(request, "common/500.html", context)
+    response.status_code = 500
+    return response

@@ -1,6 +1,5 @@
 from django.urls import path, include
 
-
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('common/', include('common.urls')),
@@ -14,5 +13,6 @@ urlpatterns = [
     path('residents/', include('residents.urls')),
     path('alarm/', include('alarm.urls')),
 ]
-
+handler500 = 'common.views.handler500'
 handler404 = 'common.views.page_not_found'
+
