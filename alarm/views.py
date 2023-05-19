@@ -12,7 +12,7 @@ state_data = {'state': 'fire'}
 class GetData(APIView):
     def post(self, request):
         data = request.POST.get('message')
-        webbrowser.open('http://192.168.0.175:5000/alarm/')
+        webbrowser.open('http://3.34.74.107/alarm/')
 
         state_data['state'] = data
 
@@ -23,7 +23,7 @@ def alarm(request):
     if request.method == "GET":
         if 'session' in request.COOKIES:
             body = {'session': request.COOKIES['session']}
-            responses = requests.post(base_url + '/SessionData/', data=body)
+            responses = requests.post(base_url + 'SessionData/', data=body)
             data = responses.json()
 
             context = {
