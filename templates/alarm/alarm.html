@@ -10,15 +10,16 @@
         <td>
             {% if alarm_data %}
                 {% if alarm_data == 'fire' %}
+                    <h2 class="display-4 text-danger text-center">화재 사고</h2>
                         <img
-                            src="http://192.168.0.220:5000/video_feed"
+                            src="http://192.168.0.220:7800/cctv_video/video_feed/"
                             style="width: 500px; height: 500px" alt="화재 현장" class="border m-2"/>
                 {% elif alarm_data == 'rain' %}
-
+                    <h2 class="display-4 text-danger text-center">호우 주의보</h2>
                 {% elif alarm_data == 'snow' %}
-
+                    <h2 class="display-4 text-danger text-center">폭설 주의보</h2>
                 {% elif alarm_data == 'storm' %}
-
+                    <h2 class="display-4 text-danger text-center">강풍 주의보</h2>
                 {% endif %}
             {% endif %}
         </td>
