@@ -108,7 +108,7 @@
                 <td>입</td>
             {% endif %}
             <td style="padding: 5px; ">
-                <a href="#" data-uri="{% url 'visitor:visitor_delete' visitor.visitor_information_number %}"
+                <a href="javascript:void(0)" data-uri="{% url 'visitor:visitor_delete' visitor.visitor_information_number %}"
                         class="delete btn btn-danger pull-right btn-sm" >삭제</a>
             </td>
         </tr>
@@ -373,7 +373,7 @@ Array.from(delete_elements).forEach(function(element) {
     element.addEventListener('click', function() {
         if(confirm("정말로 삭제하시겠습니까?")) {
             location.href = this.dataset.uri;
-        };
+        }
     });
 });
 </script>

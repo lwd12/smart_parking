@@ -139,7 +139,7 @@ def visitor(request):
 def delete(request, visitor_information_number):  # 방문자 정보 삭제
     if 'session' in request.COOKIES:
 
-        send_api(base_url, f"visitor_information/{visitor_information_number}", "DELETE", headers, body)
+        send_api(base_url, f"/visitor_information/{visitor_information_number}", "DELETE", headers, body)
         return redirect('visitor:visitor')
     else:
         return redirect('common:login')

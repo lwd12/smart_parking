@@ -5,7 +5,6 @@ app_name = 'visitor'
 
 urlpatterns = [
     path('', views.visitor, name='visitor'),
-    path('visitor/delete/<int:visitor_information_number>/',
-         views.delete, name='visitor_delete'),
+    path('delete/<int:visitor_information_number>/', views.delete, name='visitor_delete'),
 
 ]
