@@ -28,7 +28,7 @@ def answer_create(request, question_number):  # 댓글 생성
             body['creator'] = data['username']  # 작성자
             body['modify_date'] = None  # 수정 시간
             body['question_number'] = question_number  # 질문 번호
-            print(body)
+
             send_api(base_url, "/answer/", "POST", headers, body)
             return redirect('pybo:detail', question_number=question_number)
         else:
