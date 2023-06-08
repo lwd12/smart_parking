@@ -130,23 +130,26 @@ def signup(request):  # 회원 가입
         login_ID = request.POST.get('username')
         login_PassWd = request.POST.get('password')
         email = request.POST.get('email')
+
         # 로그인 조건 ID는 15자 미만, PW는 특수문자 1개 이상,숫자 영어 혼용
         if not 8 <= len(login_ID) < 15:
+            print('1')
             context = {'error_message': '아이디의 길이가 맞지 않습니다.'}
             return respond
 
         pattern = r"^(?=.*[!@#$%^&*(),.?\":{}|<>])(?=.*\d)(?=.*[a-zA-Z]).{8,19}$"
         if not re.match(pattern, login_PassWd):
+            print('2')
             context = {'error_message': '비밀번호 형식이 맞지 않습니다.'}
             return respond
         # PW 암호화
         hashed_password = hashlib.sha256(login_PassWd.encode('utf-8')).hexdigest()
         hashed_session = hashlib.sha256(login_ID.encode('utf-8')).hexdigest()
         body = {'login_ID': login_ID, 'login_PassWd': hashed_password, 'email': email, 'session': hashed_session}
-        print()
+
         response = requests.post(base_url + '/RegistUser/', data=body)
         data = response.json()
-
+        print(data)
         if data.get('error'):
             context = {'error_message': data['error']}
             return respond
